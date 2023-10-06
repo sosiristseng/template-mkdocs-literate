@@ -1,5 +1,6 @@
 name: Build notebooks and publish
 
+# Using SSH deploy key for automerge, so there is no `pull_request` event
 on:
   workflow_dispatch:
   push:
