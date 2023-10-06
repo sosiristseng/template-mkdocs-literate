@@ -16,7 +16,6 @@ concurrency:
 
 env:
   PYTHON_VER: '3.x'
-  APP_ID: '189113' # https://github.com/apps/wen-wei-s-pr-bot
   JULIA_NUM_THREADS: 'auto'
   JULIA_CONDAPKG_BACKEND: 'Null'
   JULIA_PKG_PRECOMPILE_AUTO: '0'
