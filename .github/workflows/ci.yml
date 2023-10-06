@@ -60,8 +60,6 @@ jobs:
   render:
     needs: execute
     runs-on: ubuntu-latest
-    container:
-      image: squidfunk/mkdocs-material:9.4.4
     # store success output flag for the ci job
     outputs:
       success: ${{ steps.setoutput.outputs.success }}
@@ -78,6 +76,15 @@ jobs:
         working-directory: out
       - name: Copy back built notebooks
         run: cp --verbose -rf out/* docs/
+      - name: Setup Python ${{ env.PYTHON_VER }}
+        uses: actions/setup-python@v4
+        id: python
+        with:
+          python-version: ${{ env.PYTHON_VER }}
+          cache: 'pip'
+          cache-dependency-path: '.github/requirements.txt'
+      - name: Install Python dependencies
+        run: pip install -r .github/requirements.txt
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v3
