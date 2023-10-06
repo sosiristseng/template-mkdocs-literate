@@ -46,7 +46,7 @@ jobs:
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v5
-      - name: Automerge
-        run: gh pr merge --squash --auto --delete-branch --subject "Julia update" ${{ steps.cpr.outputs.pull-request-number }}
-        env:
-          GH_TOKEN: ${{ github.token }}
+        with:
+          commit-message: Julia update
+          labels: |
+            automerge
