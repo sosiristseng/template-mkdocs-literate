@@ -110,8 +110,8 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      # pass step only when output of previous jupyter-book job is set
-      # in case at least one of the execution fails, jupyter-book is skipped
+      # pass step only when output of previous render job is set
+      # in case at least one of the execution fails, render is skipped
       # and the output will not be set, which will then cause the ci job to fail
       - run: |
           passed="${{ needs.render.outputs.success }}"
