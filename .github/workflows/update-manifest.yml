@@ -28,6 +28,8 @@ jobs:
       - name: Setup Julia
         uses: julia-actions/setup-julia@v1
       - name: Update Julia dependencies
+        env:
+          JULIA_PKG_PRECOMPILE_AUTO: '0'
         run: julia --color=yes --project=@. -e "import Pkg; Pkg.update()"
       - name: Create Pull Request
         id: cpr
