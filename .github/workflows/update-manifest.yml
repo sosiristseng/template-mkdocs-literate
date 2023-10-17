@@ -14,13 +14,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  PYTHON_VER: '3.x'
-  APP_ID: '189113' # https://github.com/apps/wen-wei-s-pr-bot
-  JULIA_NUM_THREADS: 'auto'
-  JULIA_CONDAPKG_BACKEND: 'Null'
-  JULIA_PKG_PRECOMPILE_AUTO: '0'
-
 jobs:
   update-manifest:
     permissions:
@@ -39,9 +32,6 @@ jobs:
       - name: Setup Julia
         uses: julia-actions/setup-julia@v1
       - name: Update Julia dependencies
-        env:
-          PYTHON: ${{ env.pythonLocation }}/python
-          JULIA_PYTHONCALL_EXE: ${{ env.pythonLocation }}/python
         run: julia --color=yes --project=@. -e "import Pkg; Pkg.update()"
       - name: Create Pull Request
         id: cpr
