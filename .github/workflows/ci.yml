@@ -70,9 +70,6 @@ jobs:
         uses: actions/upload-pages-artifact@v2
         with:
           path: ./site
-      - name: Set output flag
-        id: setoutput
-        run: echo "success=true" >> $GITHUB_OUTPUT
 
   deploy:
     name: Deploy to GitHub pages
