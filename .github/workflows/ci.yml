@@ -41,6 +41,15 @@ jobs:
           tags: ${{ env.IMG }}
           load: true
           cache-from: type=registry,ref=${{ env.IMG }}
+      - name: Push Docker container
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: 'env.Dockerfile'
+          tags: ${{ env.IMG }}
+          push: true
+          cache-from: type=registry,ref=${{ env.IMG }}
+          cache-to: type=inline
       - name: Build notebooks with ${{ env.NPROC }} processes
         run: >
           docker run --rm -e JULIA_PROJECT=@. -w /tmp -v ${{ github.workspace }}:/tmp
