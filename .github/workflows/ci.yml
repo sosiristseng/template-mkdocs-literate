@@ -14,7 +14,7 @@ env:
   PYTHON_VER: '3.11'
 
 jobs:
-  CI:
+  execute:
     runs-on: ubuntu-latest
     container:
       image: julia:1.9.3
@@ -55,20 +55,70 @@ jobs:
         env:
           JULIA_PROJECT: '@.'
         run: julia --color=yes -p ${{ env.NPROC }} literate.jl
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v3
+      - name: Upload Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: notebooks
+          path: docs/
+          retention-days: 1
+
+  render:
+    needs: execute
+    runs-on: ubuntu-latest
+    # store success output flag for the ci job
+    outputs:
+      success: ${{ steps.setoutput.outputs.success }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download notebooks
+        uses: actions/download-artifact@v3
+        with:
+          name: notebooks
+          path: out/
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: out
+      - name: Copy back built notebooks
+        run: cp --verbose -rf out/* docs/
+      - name: Setup micromamba
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: conda.yml
+          init-shell: bash
+          cache-environment: true
+          post-cleanup: all
       - name: Build website
-        env:
-          SITE_URL: ${{ steps.pages.outputs.base_url }}
-          REPO_URL: ${{ github.server_url	}}/${{ github.repository }}
-          REPO_NAME: ${{ github.repository }}
+        shell: micromamba-shell {0}
         run: mkdocs build
       - name: Upload pages artifact
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: actions/upload-pages-artifact@v2
         with:
-          path: ./site
+          path: docs/_build/html
+      - name: Set output flag
+        id: setoutput
+        run: echo "success=true" >> $GITHUB_OUTPUT
+
+  # CI conclusion for GitHub status check
+  # https://brunoscheufler.com/blog/2022-04-09-the-required-github-status-check-that-wasnt
+  CI:
+    needs: render
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      # pass step only when output of previous jupyter-book job is set
+      # in case at least one of the execution fails, jupyter-book is skipped
+      # and the output will not be set, which will then cause the ci job to fail
+      - run: |
+          passed="${{ needs.render.outputs.success }}"
+          if [[ $passed == "true" ]]; then
+            echo "Tests passed"
+            exit 0
+          else
+            echo "Tests failed"
+            exit 1
+          fi
 
   deploy:
     name: Deploy to GitHub pages
