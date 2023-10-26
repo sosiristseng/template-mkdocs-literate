@@ -1,9 +1,11 @@
 name: Build notebooks and publish
 
-# Using SSH deploy keys for automerge, so `push` events only
 on:
   workflow_dispatch:
   push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
