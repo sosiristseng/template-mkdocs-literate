@@ -1,10 +1,8 @@
 #===
-# Plotting with PyPlot.jl
-
-Testing [PyPlot.jl](https://github.com/JuliaPy/PyPlot.jl) since it is tricky to install.
+# Plotting with PythonPlot.jl
 ===#
 
-import PyPlot as plt
+import PythonPlot as plt
 using Random
 Random.seed!(2022)
 
