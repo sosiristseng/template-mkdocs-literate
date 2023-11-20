@@ -25,6 +25,12 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+    - name: Setup micromamba
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-file: environment.yml
+        cache-environment: true
+        post-cleanup: all
     - name: Read Julia version
       uses: SebRollen/toml-action@v1.0.2
       id: read_toml
