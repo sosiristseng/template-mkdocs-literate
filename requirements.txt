@@ -1,2 +1,2 @@
 mkdocs-material==9.4.14
-matplitlib==3.8.1
+matplotlib==3.8.1
