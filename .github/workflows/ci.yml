@@ -30,7 +30,14 @@ jobs:
       with:
         python-version: ${{ env.PY_VER }}
         cache: 'pip'
+    - name: Cache pip
+      uses: actions/cache@v3
+      id: cache-pip
+      with:
+        path: ${{ env.pythonLocation }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
     - name: Install python packages
+      if: ${{ steps.cache-pip.outputs.cache-hit != 'true' }}
       run: pip install -r requirements.txt
     - name: Read Julia version
       uses: SebRollen/toml-action@v1.0.2
@@ -43,28 +50,29 @@ jobs:
         wget -O /tmp/jill.sh https://raw.githubusercontent.com/abelsiqueira/jill/main/jill.sh
         bash /tmp/jill.sh --version ${{ steps.read_toml.outputs.value }} -y
         echo "$HOME/.local/bin" >> $GITHUB_PATH
-    - name: Restore Julia packages
+    - name: Cache Julia packages
       uses: actions/cache/restore@v3
-      id: cache
+      id: cache-julia
       with:
         path: |
           ~/.julia
           !~/.julia/registries
-        key: ${{ runner.os }}-julia-${{ env.CACHE_NUM }}-${{ hashFiles('src/**','Project.toml', 'Manifest.toml')}}
+        key: ${{ runner.os }}-julia-${{ env.CACHE_NUM }}-${{ hashFiles('src/**','Project.toml', 'Manifest.toml', '~/.julia/logs/orphaned.toml')}}
         restore-keys: |
           ${{ runner.os }}-julia-${{ env.CACHE_NUM }}-
     - name: Install Julia packages
+      if: ${{ steps.cache-julia.outputs.cache-hit != 'true' }}
       run: |
         julia --color=yes -e 'using Pkg; Pkg.add(["PrettyTables", "Literate"])'
-        julia --project=@. --color=yes -e 'using Pkg, Dates; Pkg.instantiate(); Pkg.gc(collect_delay=Day(1))'
+        julia --project=@. --color=yes -e 'using Pkg, Dates; Pkg.instantiate(); Pkg.resolve(); Pkg.precompile(); Pkg.gc(collect_delay=Day(0))'
     - name: Save Julia packages
       uses: actions/cache/save@v3
-      if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+      if: ${{ steps.cache-julia.outputs.cache-hit != 'true' }}
       with:
         path: |
           ~/.julia
           !~/.julia/registries
-        key: ${{ steps.cache.outputs.cache-primary-key }}
+        key: ${{ runner.os }}-julia-${{ env.CACHE_NUM }}-${{ hashFiles('src/**','Project.toml', 'Manifest.toml', '~/.julia/logs/orphaned.toml')}}
     - name: Run program
       env:
         JULIA_PROJECT: '@.'
