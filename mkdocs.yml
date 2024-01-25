@@ -10,7 +10,7 @@ edit_uri: 'edit/main/docs/' # Leave blank to disable the edit button,
 copyright: Copyright &copy; 2016 - 2023 Wen-Wei Tseng
 
 # Nav bar
-# Uncomment to customize nav bar
+# Uncomment the lines below to customize nav bar
 # nav:
 #   - Home: index.md
 #   - About: about.md
@@ -24,7 +24,6 @@ copyright: Copyright &copy; 2016 - 2023 Wen-Wei Tseng
 # MkDocs plugins
 plugins:
   - search
-  - mkdocs-jupyter
 
 # Theme configuration
 # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/
@@ -66,7 +65,6 @@ theme:
     - toc.follow
     # - toc.integrate
     # - navigation.expand
-
   icon:
     repo: fontawesome/brands/github-alt
 
@@ -109,9 +107,6 @@ markdown_extensions:
       smart_enable: all
   # - pymdownx.critic
   - pymdownx.details
-  # - pymdownx.emoji:
-  #     emoji_index: !!python/name:material.extensions.emoji.twemoji
-  #     emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight
   - pymdownx.inlinehilite
   - pymdownx.keys
