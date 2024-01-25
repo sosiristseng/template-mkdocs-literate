@@ -33,11 +33,8 @@ jobs:
     - name: Install python packages
       run: pip install -r requirements.txt
     - name: Read Julia version
-      uses: SebRollen/toml-action@v1.0.2
       id: read_toml
-      with:
-        file: 'Manifest.toml'
-        field: 'julia_version'
+      run: echo "value=$(python .github/read_toml.py)" >> "$GITHUB_OUTPUT"
     - name: Setup Julia
       uses: julia-actions/setup-julia@v1
       with:
@@ -55,9 +52,16 @@ jobs:
           ${{ runner.os }}-julia-${{ env.CACHE_NUM }}-
     - name: Install Julia packages
       if: ${{ steps.cache-julia.outputs.cache-hit != 'true' }}
+      env:
+        PYTHON: ${{ env.pythonLocation }}/python
+      shell: julia --color=yes {0}
       run: |
-        julia --color=yes -e 'using Pkg; Pkg.add(["PrettyTables", "Literate"])'
-        julia --project=@. --color=yes -e 'using Pkg, Dates; Pkg.instantiate(); Pkg.resolve(); Pkg.precompile(); Pkg.gc(collect_delay=Day(0))'
+        using Pkg, Dates
+        Pkg.add(["PrettyTables", "Literate"])
+        Pkg.activate(".")
+        Pkg.instantiate()
+        Pkg.precompile()
+        Pkg.gc(collect_delay=Day(0))
     - name: Run program
       run: julia --color=yes -p ${{ env.NPROC }} literate.jl
     - name: Setup Pages
