@@ -17,6 +17,7 @@ env:
   PY_VER: '3.12'
   JULIA_CONDAPKG_BACKEND: 'Null'
   JULIA_CI: 'true'
+  JULIA_NUM_THREADS: '2'
 
 jobs:
   CI:
@@ -29,8 +30,15 @@ jobs:
       id: cp
       with:
         python-version: ${{ env.PY_VER }}
-        cache: 'pip'
-    - name: Install python packages
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      id: cache-py
+      with:
+        save-always: 'true'
+        path: ${{ env.pythonLocation }}
+        key:  ${{ runner.os }}-pip-${{ env.CACHE_NUM }}-${{ steps.cp.outputs.python-version }}-${{ hashFiles('requirements.txt') }}
+    - name: Install pip dependencies if cache miss
+      if: ${{ steps.cache-py.outputs.cache-hit != 'true' }}
       run: pip install -r requirements.txt
     - name: Read Julia version
       uses: SebRollen/toml-action@v1.2.0
@@ -50,7 +58,7 @@ jobs:
         path: |
           ~/.julia
           !~/.julia/registries
-        key: ${{ runner.os }}-julia-${{ env.CACHE_NUM }}-${{ hashFiles('src/**','Project.toml', 'Manifest.toml')}}
+        key: ${{ runner.os }}-julia-${{ env.CACHE_NUM }}-${{ hashFiles('src/**', 'Project.toml', 'Manifest.toml' )}}
         restore-keys: |
           ${{ runner.os }}-julia-${{ env.CACHE_NUM }}-
     - name: Install Julia packages
@@ -65,12 +73,22 @@ jobs:
         Pkg.instantiate()
         Pkg.precompile()
         Pkg.gc(collect_delay=Day(0))
-    - name: Run notebooks
+    - name: Cache literate notebooks
+      uses: actions/cache@v4
+      id: cache-nb
+      with:
+        path: |
+          docs/**/*.ipynb
+          docs/**/*.sha
+        key: ${{ runner.os }}-nb-${{ hashFiles('src/**', 'Project.toml', 'Manifest.toml' )}}-${{ hashFiles('docs/**/*.jl') }}
+        restore-keys: |
+          ${{ runner.os }}-nb-${{ hashFiles('src/**', 'Project.toml', 'Manifest.toml' )}}-
+    - name: Run program
       run: julia --color=yes -p ${{ env.NPROC }} literate.jl
     - name: Convert jupyter notebooks to Markdown files
       run: >
-        find docs -type f -name '*.ipynb' |
-        parallel -j1 jupyter nbconvert --to markdown {}
+        find docs -type f -name '*.ipynb' -exec
+        parallel -j1 jupyter nbconvert --to markdown {} \;
     - name: Setup Pages
       id: pages
       uses: actions/configure-pages@v4
