@@ -58,7 +58,7 @@ jobs:
         path: |
           ~/.julia
           !~/.julia/registries
-        key: ${{ runner.os }}-julia-${{ env.CACHE_NUM }}-${{ hashFiles('src/**', 'Project.toml', 'Manifest.toml' )}}
+        key: ${{ runner.os }}-julia-${{ env.CACHE_NUM }}-${{ hashFiles('src/**', 'Project.toml', 'Manifest.toml') }}
         restore-keys: |
           ${{ runner.os }}-julia-${{ env.CACHE_NUM }}-
     - name: Install Julia packages
@@ -83,12 +83,12 @@ jobs:
         key: ${{ runner.os }}-nb-${{ hashFiles('src/**', 'Project.toml', 'Manifest.toml' )}}-${{ hashFiles('docs/**/*.jl') }}
         restore-keys: |
           ${{ runner.os }}-nb-${{ hashFiles('src/**', 'Project.toml', 'Manifest.toml' )}}-
-    - name: Run program
+    - name: Run notebooks
       run: julia --color=yes -p ${{ env.NPROC }} literate.jl
     - name: Convert jupyter notebooks to Markdown files
       run: >
-        find docs -type f -name '*.ipynb' -exec
-        parallel -j1 jupyter nbconvert --to markdown {} \;
+        find docs -type f -name '*.ipynb' |
+        parallel -j1 jupyter nbconvert --to markdown {}
     - name: Setup Pages
       id: pages
       uses: actions/configure-pages@v4
