@@ -88,7 +88,9 @@ jobs:
     - name: Convert jupyter notebooks to Markdown files
       run: >
         find docs -type f -name '*.ipynb' |
-        parallel -j1 jupyter nbconvert --to markdown {}
+        parallel -j2 jupyter nbconvert --to markdown {}
+    - name: Remove ipynb files
+      run: find docs -type f -name '*.ipynb' -exec rm {} \;
     - name: Setup Pages
       id: pages
       uses: actions/configure-pages@v4
